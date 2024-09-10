@@ -18,6 +18,20 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] string nextSceneName = "Stage02";
 
+    private void OnEnable()
+    {
+        // Brokenクラスのイベントにサブスクライブ
+        Broken.OnScoreAdded += AddScore;
+        Broken.OnObjectBroken += OnBroken;
+    }
+
+    private void OnDisable()
+    {
+        // イベントからのサブスクライブ解除
+        Broken.OnScoreAdded -= AddScore;
+        Broken.OnObjectBroken -= OnBroken;
+    }
+
     private void Start()
     {
         uiManager.HideResult();
