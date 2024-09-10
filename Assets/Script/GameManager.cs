@@ -4,95 +4,98 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-	[SerializeField] GameObject ballPrefab;
-	[SerializeField] int ballCount = 3;
-	[SerializeField] float leftTime = 30;
+    [SerializeField] GameObject ballPrefab;
+    [SerializeField] int ballCount = 3;
 
-	[SerializeField] UIManager uiManager;
+    [SerializeField] UIManager uiManager;
+    [SerializeField] TimerManager timerManager;
+    [SerializeField] SceneLoader sceneLoader;
 
-	private int score = 0;
-	private bool inGame = true;
-	private int brokenObjectCount;
-	private int highScore = 0;
+    private int score = 0;
+    private bool inGame = true;
+    private int brokenObjectCount;
+    private int highScore = 0;
 
-	[SerializeField] string nextSceneName = "Stage02";
+    [SerializeField] string nextSceneName = "Stage02";
 
-	private void Start()
-	{
-		uiManager.HideResult();
-		uiManager.SetScoreText(score);
+    private void Start()
+    {
+        uiManager.HideResult();
+        uiManager.SetScoreText(score);
 
-		brokenObjectCount = FindObjectsOfType<Broken>().Length;
-	}
+        brokenObjectCount = FindObjectsOfType<Broken>().Length;
 
-	private void Update()
-	{
-		if (inGame)
-		{
-			leftTime -= Time.deltaTime;
-			uiManager.SetTimerText(leftTime);
+        timerManager.StartTimer();
+        timerManager.OnTimerEnd += HandleTimerEnd;
+    }
 
-			if (leftTime <= 0)
-			{
-				inGame = false;
-				uiManager.SetTimerText(0);
-				uiManager.ShowGameOver();
-			}
-		}
-	}
+    private void Update()
+    {
+        if (inGame)
+        {
+            uiManager.SetTimerText(timerManager.GetLeftTime());
+        }
+    }
 
-	public void AddScore(int point)
-	{
-		score += point;
-		uiManager.SetScoreText(score);
-	}
+    private void HandleTimerEnd()
+    {
+        inGame = false;
+        uiManager.SetTimerText(0);
+        uiManager.ShowGameOver();
+    }
 
-	public void OnBroken()
-	{
-		brokenObjectCount--;
-		if (brokenObjectCount <= 0)
-		{
-			inGame = false;
-			uiManager.ShowClear();
-			ShowResult();
-		}
-	}
+    public void AddScore(int point)
+    {
+        score += point;
+        uiManager.SetScoreText(score);
+    }
 
-	public void OnKillBall()
-	{
-		ballCount--;
+    public void OnBroken()
+    {
+        brokenObjectCount--;
+        if (brokenObjectCount <= 0)
+        {
+            inGame = false;
+            uiManager.ShowClear();
+            ShowResult();
+        }
+    }
 
-		if (ballCount > 0)
-		{
-			GameObject newBall = Instantiate(ballPrefab);
-			newBall.name = ballPrefab.name;
-		}
-		else
-		{
-			inGame = false;
-			uiManager.ShowGameOver();
-		}
-	}
+    public void OnKillBall()
+    {
+        ballCount--;
 
-	private void ShowResult()
-	{
-		int totalScore = score + Mathf.RoundToInt(leftTime) * 100 + ballCount * 500;
+        if (ballCount > 0)
+        {
+            GameObject newBall = Instantiate(ballPrefab);
+            newBall.name = ballPrefab.name;
+        }
+        else
+        {
+            inGame = false;
+            uiManager.ShowGameOver();
+        }
+    }
 
-		if (highScore < totalScore)
-		{
-			highScore = totalScore;
-		}
+    private void ShowResult()
+    {
+        int totalScore = score + Mathf.RoundToInt(timerManager.GetLeftTime()) * 100 + ballCount * 500;
 
-		uiManager.ShowResult(score, leftTime, ballCount, totalScore, highScore);
-	}
+        if (highScore < totalScore)
+        {
+            highScore = totalScore;
+        }
 
-	public void OnTapRetry()
-	{
-		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-	}
+        uiManager.ShowResult(score, timerManager.GetLeftTime(), ballCount, totalScore, highScore);
+    }
 
-	public void OnTapNextScene()
-	{
-		SceneManager.LoadScene(nextSceneName);
-	}
+    public void OnTapRetry()
+    {
+        sceneLoader.ReloadCurrentScene();
+    }
+
+    public void OnTapNextScene()
+    {
+        sceneLoader.LoadSceneByName(nextSceneName);
+    }
 }
