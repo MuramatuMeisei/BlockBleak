@@ -20,16 +20,16 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Brokenクラスのイベントにサブスクライブ
         Broken.OnScoreAdded += AddScore;
         Broken.OnObjectBroken += OnBroken;
+        Kill.OnObjectKill += OnKillBall;
     }
 
     private void OnDisable()
     {
-        // イベントからのサブスクライブ解除
         Broken.OnScoreAdded -= AddScore;
         Broken.OnObjectBroken -= OnBroken;
+        Kill.OnObjectKill -= OnKillBall;
     }
 
     private void Start()

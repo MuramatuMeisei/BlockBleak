@@ -1,15 +1,16 @@
+using System;
 using UnityEngine;
 
 public class Kill : MonoBehaviour
 {
-	[SerializeField] GameManager gameManager;
+	public static event Action OnObjectKill;
 
 	private void OnCollisionEnter(Collision collision)
 	{
 		if (collision.gameObject.tag == "Ball")
 		{
 			Destroy(collision.gameObject);
-			gameManager.OnKillBall();
+			OnObjectKill.Invoke();
 		}
 	}
 }
